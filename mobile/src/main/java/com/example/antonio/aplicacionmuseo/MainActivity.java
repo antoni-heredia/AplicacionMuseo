@@ -22,11 +22,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.lang.reflect.Array;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
 
     // Write a message to the database
+    Museo ms = new Museo("Fundacion Rodriguez-Acosta");
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
     @Override
@@ -68,6 +71,8 @@ public class MainActivity extends AppCompatActivity
                 Escribir();
             }
         });
+        /****************************************************************/
+
     }
 
     @Override
@@ -128,23 +133,37 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void onBtnClick(){
-        // Read from the database
-        DatabaseReference myRef = database.getReference("message");
-        myRef.addValueEventListener(new ValueEventListener() {
+        DatabaseReference rootRef = database.getReference("Colecciones");
+        ValueEventListener eventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                String value = dataSnapshot.getValue(String.class);
-                Toast.makeText(getApplicationContext(),"Value is: " + value,Toast.LENGTH_LONG).show();
+                //oast.makeText(getApplicationContext(),dataSnapshot.getKey(), Toast.LENGTH_LONG).show();
+
+                for(DataSnapshot dsColeccion : dataSnapshot.getChildren()) {
+
+                    Coleccion c = new Coleccion(dsColeccion.getKey());
+                    for(DataSnapshot dsObra : dsColeccion.getChildren()){
+
+                        Obra obra = new Obra(dsObra.getKey(),dsObra.getValue(String.class));
+                        Toast.makeText(getApplicationContext(),obra.descripcion, Toast.LENGTH_LONG).show();
+
+                        c.addObra(obra);
+                    }
+                    ms.addColeccion(c);
+
+                }
+
+
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Toast.makeText(getApplicationContext(),"Failed to read value.",Toast.LENGTH_LONG).show();
-                }
-        });
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(),"error: database", Toast.LENGTH_LONG).show();
+            }
+        };
+
+        rootRef.addValueEventListener(eventListener);
+
     }
     private void Escribir(){
         // Read from the database

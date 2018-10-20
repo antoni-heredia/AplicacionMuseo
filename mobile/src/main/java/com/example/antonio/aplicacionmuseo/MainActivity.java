@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity
 
     // Write a message to the database
     FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef = database.getReference("message");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +56,16 @@ public class MainActivity extends AppCompatActivity
 
         final Button button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
+
             public void onClick(View v) {
                 onBtnClick();
+            }
+        });
+        final Button boton = findViewById(R.id.button2);
+        boton.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                Escribir();
             }
         });
     }
@@ -122,6 +129,7 @@ public class MainActivity extends AppCompatActivity
 
     private void onBtnClick(){
         // Read from the database
+        DatabaseReference myRef = database.getReference("message");
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -137,5 +145,10 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(getApplicationContext(),"Failed to read value.",Toast.LENGTH_LONG).show();
                 }
         });
+    }
+    private void Escribir(){
+        // Read from the database
+        DatabaseReference myRef = database.getReference("mensajeEnviado");
+        myRef.setValue("Hello, World!");
     }
 }

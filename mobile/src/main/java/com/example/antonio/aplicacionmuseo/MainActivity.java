@@ -58,8 +58,8 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         //Codigo añadido por mi
-        traerDatosMuseo();
-
+        FirebaseMuseo msfire = new FirebaseMuseo(database);
+        msfire.traerDatosMuseo(ms);
         final Button button = findViewById(R.id.button);
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+            btnMostrarDatosClick();
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -137,153 +137,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void traerDatosMuseo(){
-        /*
-        DatabaseReference rootRef = database.getReference("Colecciones");
-        ValueEventListener eventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //oast.makeText(getApplicationContext(),dataSnapshot.getKey(), Toast.LENGTH_LONG).show();
 
-                for(DataSnapshot dsColeccion : dataSnapshot.getChildren()) {
-
-                    Coleccion c = new Coleccion(dsColeccion.getKey());
-                    for(DataSnapshot dsObra : dsColeccion.getChildren()){
-
-                        Obra obra = new Obra(dsObra.getKey(),dsObra.getValue(String.class));
-
-                        c.addObra(obra);
-                    }
-                    ms.addColeccion(c);
-
-                }
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(),"error: database", Toast.LENGTH_LONG).show();
-            }
-        };
-
-        rootRef.addValueEventListener(eventListener);
-        */
-
-
-        traerDatosColecciones();
-    }
-    private void traerDatosColecciones(){
-        //Traer colecciones
-        DatabaseReference referenciaColecciones = database.getReference("Coleciones");
-        ValueEventListener eventListenerColecciones = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for(DataSnapshot dsColeccion : dataSnapshot.getChildren()) {
-
-                    Coleccion c = new Coleccion(Integer.parseInt(dsColeccion.getKey()));
-
-                    for(DataSnapshot dsCampo : dsColeccion.getChildren()){
-
-                        if(dsCampo.getKey().equals("Nombre")){
-                            c.nombreColeccion = dsCampo.getValue(String.class);
-                        }else if (dsCampo.getKey().equals("Descripcion")){
-                            c.descripcion = dsCampo.getValue(String.class);
-
-                        }
-                    }
-                    ms.addColeccion(c);
-
-                }
-                traerDatosSalas();
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(),"error: database", Toast.LENGTH_LONG).show();
-            }
-        };
-        //Añadir eventlisteners
-        referenciaColecciones.addValueEventListener(eventListenerColecciones);
-    }
-    private void traerDatosSalas(){
-        //Traer datos salas
-        DatabaseReference referenciaSalas = database.getReference("Salas");
-        ValueEventListener eventListenerSalas = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //oast.makeText(getApplicationContext(),dataSnapshot.getKey(), Toast.LENGTH_LONG).show();
-
-                for(DataSnapshot dsSala : dataSnapshot.getChildren()) {
-
-                    Sala s = new Sala(Integer.parseInt(dsSala.getKey()));
-                    for(DataSnapshot dsCampo : dsSala.getChildren()){
-                        if(dsCampo.getKey().equals("Nombre")){
-                            s.nombre = dsCampo.getValue(String.class);
-                        }
-                    }
-                    ms.addSala(s);
-
-                }
-                traerDatosObras();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(),"error: database", Toast.LENGTH_LONG).show();
-            }
-        };
-        referenciaSalas.addValueEventListener(eventListenerSalas);
-
-    }
-    private void traerDatosObras(){
-        //Traer datos obras
-        DatabaseReference referenciaObras = database.getReference("Obras");
-        ValueEventListener eventListenerObras = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                //oast.makeText(getApplicationContext(),dataSnapshot.getKey(), Toast.LENGTH_LONG).show();
-
-                for(DataSnapshot dsSala : dataSnapshot.getChildren()) {
-
-                    Obra o = new Obra(Integer.parseInt(dsSala.getKey()));
-                    for(DataSnapshot dsCampo : dsSala.getChildren()){
-
-                        switch (dsCampo.getKey()){
-                            case "Nombre":
-                                o.nombreObra = dsCampo.getValue(String.class);
-                                break;
-                            case "Id_coleccion":
-                                o.coleccion = ms.getColeccion(dsCampo.getValue(Integer.class));
-                            case "Id_sala":
-                                o.sala = ms.getSala(dsCampo.getValue(Integer.class));
-                                break;
-                            case "Descripcion":
-                                o.descripcion = dsCampo.getValue(String.class);
-                                break;
-                            case "URL":
-                                o.url = dsCampo.getValue(String.class);
-                        }
-
-                    }
-                    ms.addObra(o);
-
-                }
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(),"error: database", Toast.LENGTH_LONG).show();
-            }
-        };
-        referenciaObras.addValueEventListener(eventListenerObras);
-
-    }
     private void btnMostrarDatosClick(){
         Toast.makeText(getApplicationContext(), ms.obras.get(0).coleccion.toString(), Toast.LENGTH_SHORT).show();
     }

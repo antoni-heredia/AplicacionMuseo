@@ -8,11 +8,13 @@ class Museo {
     ArrayList<Coleccion> colecciones;
     ArrayList<Obra> obras;
     ArrayList<Sala> salas;
+    private int posObra;
     public Museo(String nombreMuseo) {
         this.nombreMuseo = nombreMuseo;
         colecciones = new ArrayList<Coleccion>();
         obras = new ArrayList<Obra>();
         salas = new ArrayList<Sala>();
+        posObra = 0;
     }
 
     public void addColeccion( Coleccion coleccion){
@@ -29,13 +31,31 @@ class Museo {
         return null;
     }
 
-    public Obra getObra(int id){
+    public Obra getObraSiguiente(){
+        posObra++;
+        if(posObra > obras.size())
+            posObra  = 0;
+        return obras.get(posObra);
+    }
+
+    public Obra getObraAnterior(){
+        posObra--;
+        if(posObra < 0)
+            posObra  = obras.size()-1;
+        return obras.get(posObra);
+    }
+    public Obra  getObraActual(){
+        return obras.get(posObra);
+    }
+
+    public Obra getObraId(int idObra){
         for(Obra o : obras){
-            if(o.id == id)
+            if(o.id == idObra)
                 return o;
         }
         return null;
     }
+
 
     public Sala getSala(int id){
         for(Sala s : salas){

@@ -1,5 +1,6 @@
 package com.example.antonio.aplicacionmuseo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.constraint.Constraints;
 import android.support.design.widget.FloatingActionButton;
@@ -65,36 +66,8 @@ public class MainActivity extends AppCompatActivity
         //Codigo añadido por mi
         FirebaseMuseo msfire = new FirebaseMuseo(database);
         msfire.traerDatosMuseo(ms);
-        WebView wb = findViewById(R.id.wbview);
-        wb.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
-            public void onSwipeTop() {
-                Toast.makeText(getApplicationContext(), "top", Toast.LENGTH_SHORT).show();
-            }
-            public void onSwipeRight() {
-                ms.getObraSiguiente();
-                mostrarDatos();
-            }
-            public void onSwipeLeft() {
-                ms.getObraAnterior();
-                mostrarDatos();
-            }
-            public void onSwipeBottom() {
-                Toast.makeText(getApplicationContext(), "bottom", Toast.LENGTH_SHORT).show();
-            }
-
-        });
-
-        final Button button = findViewById(R.id.button);
-
-        button.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                mostrarDatos();
-            }
-        });
 
 
-        /****************************************************************/
 
     }
 
@@ -136,10 +109,12 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_qr) {
             mostrarDatos();
-        } else if (id == R.id.nav_gallery) {
-
+        } else if (id == R.id.nav_obras) {
+            Intent intent = new Intent(getApplicationContext(), Informacion_obra.class);
+            intent.putExtra("museo",ms);
+            startActivity(intent);
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -154,42 +129,9 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-/*
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
 
-        int action = MotionEventCompat.getActionMasked(event);
-
-        switch (action) {
-            case (MotionEvent.ACTION_POINTER_DOWN):
-                idObraActual ++;
-                btnMostrarDatosClick();
-                Toast.makeText(getApplicationContext(), "action down", Toast.LENGTH_SHORT).show();
-
-                return true;
-            case (MotionEvent.ACTION_MOVE):
-                Toast.makeText(getApplicationContext(), "action move", Toast.LENGTH_SHORT).show();
-                return true;
-            case (MotionEvent.ACTION_UP):
-                Toast.makeText(getApplicationContext(), "action up", Toast.LENGTH_SHORT).show();
-
-                return true;
-            case (MotionEvent.ACTION_CANCEL):
-                Toast.makeText(getApplicationContext(), "action cancel", Toast.LENGTH_SHORT).show();
-
-                return true;
-            case (MotionEvent.ACTION_OUTSIDE):
-                Toast.makeText(getApplicationContext(), "action outside", Toast.LENGTH_SHORT).show();
-
-                return true;
-            default:
-                return super.onTouchEvent(event);
-        }
-
-    }
-*/
     private void mostrarDatos(){
-
+    /*
         WebView wb = findViewById(R.id.wbview);
         Display display = getWindowManager().getDefaultDisplay();
         int width = display.getWidth();
@@ -202,7 +144,7 @@ public class MainActivity extends AppCompatActivity
 
         TextView descripcion = findViewById(R.id.txtDescripcion);
         descripcion.setText(ms.getObraActual().descripcion);
-
+*/
     }
 
     private void Escribir(){

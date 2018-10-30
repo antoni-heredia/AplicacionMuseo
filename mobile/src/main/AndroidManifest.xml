@@ -21,6 +21,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".Informacion_obra"
+            android:label="@string/title_activity_informacion_obra" />
+        <activity
+            android:name=".informacion_obra"
+            android:label="@string/title_activity_informacion_obra"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

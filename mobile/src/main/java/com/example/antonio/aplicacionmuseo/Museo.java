@@ -1,8 +1,9 @@
 package com.example.antonio.aplicacionmuseo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-class Museo {
+class Museo implements Serializable {
 
     String nombreMuseo;
     ArrayList<Coleccion> colecciones;
@@ -68,7 +69,7 @@ class Museo {
 }
 
 
-class Coleccion {
+class Coleccion implements Serializable {
     int id;
     String nombreColeccion;
     String descripcion;
@@ -87,7 +88,7 @@ class Coleccion {
     }
 }
 
-class Obra{
+class Obra implements Serializable{
     int id;
     String url;
     String nombreObra;
@@ -103,7 +104,7 @@ class Obra{
 
 }
 
-class Sala {
+class Sala implements Serializable{
     int id;
     String nombre;
     ArrayList<Obra> obras;

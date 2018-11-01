@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
@@ -78,6 +80,7 @@ public class Informacion_obra extends AppCompatActivity {
         Intent intent = getIntent();
         ms = (Museo) intent.getSerializableExtra("museo");
         ConstraintLayout cl = findViewById(R.id.layaoutObra);
+
         cl.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
             public void onSwipeTop() {
                 Toast.makeText(getApplicationContext(), "top", Toast.LENGTH_SHORT).show();
@@ -95,8 +98,6 @@ public class Informacion_obra extends AppCompatActivity {
             }
 
         });
-
-
 
 
         loadObraActual();
@@ -119,4 +120,6 @@ public class Informacion_obra extends AppCompatActivity {
         txt.setText(ms.getObraActual().descripcion);
         setTitle(ms.getObraActual().nombreObra);
     }
+
+
 }

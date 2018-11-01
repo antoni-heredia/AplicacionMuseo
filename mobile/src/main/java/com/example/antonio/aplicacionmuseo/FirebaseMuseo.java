@@ -6,22 +6,28 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.concurrent.CountDownLatch;
+
 public class FirebaseMuseo {
     FirebaseDatabase database;
-
+    boolean datosTraidos;
     public FirebaseMuseo(FirebaseDatabase database) {
         this.database = database;
+        datosTraidos = false;
     }
 
-    void traerDatosMuseo(Museo ms) {
-        traerDatosColecciones(ms);
+    void traerDatosMuseo(Museo ms)  {
+            datosTraidos = false;
+            traerDatosColecciones(ms);
+
+
     }
 
     private void traerDatosColecciones(final Museo ms) {
         //Traer colecciones
         DatabaseReference referenciaColecciones = database.getReference("Coleciones");
         ValueEventListener eventListenerColecciones = new ValueEventListener() {
-            @Override
+          @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot dsColeccion : dataSnapshot.getChildren()) {
@@ -43,7 +49,7 @@ public class FirebaseMuseo {
                 traerDatosSalas(ms);
 
 
-            }
+          }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -52,6 +58,8 @@ public class FirebaseMuseo {
         };
         //Añadir eventlisteners
         referenciaColecciones.addValueEventListener(eventListenerColecciones);
+
+
     }
 
 
@@ -91,7 +99,6 @@ public class FirebaseMuseo {
         ValueEventListener eventListenerObras = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                //oast.makeText(getApplicationContext(),dataSnapshot.getKey(), Toast.LENGTH_LONG).show();
 
                 for (DataSnapshot dsSala : dataSnapshot.getChildren()) {
 
@@ -118,7 +125,7 @@ public class FirebaseMuseo {
                     ms.addObra(o);
 
                 }
-
+                datosTraidos = true;
 
             }
 

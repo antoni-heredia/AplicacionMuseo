@@ -1,21 +1,11 @@
 package com.example.antonio.aplicacionmuseo;
 
 import android.content.Intent;
-import android.nfc.NdefMessage;
-import android.nfc.NfcAdapter;
-import android.nfc.Tag;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Parcelable;
-import android.support.constraint.Constraints;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.Display;
-import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -25,36 +15,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.WebView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import java.lang.reflect.Array;
-
-public class MainActivity extends AppCompatActivity
+public class VisualizacionObras extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    /*
-    Declarar instancias globales
-    */
-    public final String TIPO_SALA = "sala";
-    public final String TIPO_OBRA = "obra";
-    public final String TIPO_COLECCION = "coleccion";
-    // Write a message to the database
+    private RecyclerView recycler;
+    private RecyclerView.Adapter adapter;
+    private RecyclerView.LayoutManager lManager;
     Museo ms = new Museo("Fundacion Rodriguez-Acosta");
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_visualizacion_obras);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -76,19 +49,10 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //Codigo añadido por mi
-        FirebaseMuseo msfire = new FirebaseMuseo(database);
-        msfire.traerDatosMuseo(ms);
-
-        //Cuando pasan 6 segundos ejecuta esa funcion
-        /*
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                mostrarDatos();
-            }
-        }, 6600);   //5 seconds
-        */
+        //traemos los datos de la actividad anterior
+        Intent intent = getIntent();
+        ms = (Museo) intent.getSerializableExtra("museo");
+        mostrarDatos();
     }
 
     @Override
@@ -104,7 +68,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.visualizacion_obras, menu);
         return true;
     }
 
@@ -130,10 +94,9 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_qr) {
+            // Handle the camera action
         } else if (id == R.id.nav_obras) {
-            Intent intent = new Intent(getApplicationContext(), VisualizacionObras.class);
-            intent.putExtra("museo",ms);
-            startActivity(intent);
+
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -143,54 +106,25 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
 
         }
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
+    private void mostrarDatos(){
 
+        // Obtener el Recycler
+        recycler = (RecyclerView) findViewById(R.id.reciclador);
+        recycler.setHasFixedSize(true);
 
+        // Usar un administrador para LinearLayout
+        lManager = new LinearLayoutManager(this);
+        recycler.setLayoutManager(lManager);
 
-    private void Escribir(){
-        // Read from the database
-        DatabaseReference myRef = database.getReference("mensajeEnviado");
-        myRef.setValue("Hello, World!");
+        // Crear un nuevo adaptador
+        adapter = new ObrasAdapter(ms.obras);
+        recycler.setAdapter(adapter);
     }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
-            Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-            if (rawMessages != null) {
-                NdefMessage[] rawMsgs = new NdefMessage[rawMessages.length];
-                for (int i = 0; i < rawMessages.length; i++) {
-                    rawMsgs[i] = (NdefMessage) rawMessages[i];
-                }
-                // only one message sent during the beam
-                NdefMessage msg = (NdefMessage) rawMsgs[0];
-                String s = new String(msg.getRecords()[0].getPayload());
-                //Elimino los 3 primeros caracteres que aparecen ya que no son validos,
-                // no entiendo muy bien el porque ocurre
-                manejoEtiquetaNfc(s.substring(3));
-            }
-        }
-    }
-
-
-    protected  void manejoEtiquetaNfc(String text){
-        String[] registros = text.split(":");
-        String tipo = registros[0];
-        int id = Integer.parseInt(registros[1]);
-        if(tipo.toLowerCase().equals(TIPO_OBRA)){
-            ms.getObraId(id);
-            Intent intent = new Intent(getApplicationContext(), Informacion_obra.class);
-            intent.putExtra("museo",ms);
-            startActivity(intent);
-        }
-
-    }
-
 
 }

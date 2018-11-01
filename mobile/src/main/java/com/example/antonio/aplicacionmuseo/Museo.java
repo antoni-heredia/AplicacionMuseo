@@ -50,9 +50,13 @@ class Museo implements Serializable {
     }
 
     public Obra getObraId(int idObra){
+        int i = 0;
         for(Obra o : obras){
-            if(o.id == idObra)
+            if(o.id == idObra) {
+                posObra = i;
                 return o;
+            }
+            i++;
         }
         return null;
     }

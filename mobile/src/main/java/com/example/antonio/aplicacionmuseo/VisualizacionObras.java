@@ -123,7 +123,7 @@ public class VisualizacionObras extends AppCompatActivity
         recycler.setLayoutManager(lManager);
 
         // Crear un nuevo adaptador
-        adapter = new ObrasAdapter(ms.obras);
+        adapter = new ObrasAdapter(ms,getApplicationContext());
         recycler.setAdapter(adapter);
     }
 

@@ -7,6 +7,7 @@ import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.support.constraint.ConstraintLayout;
 import android.support.constraint.Constraints;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -28,6 +29,7 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,7 +39,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
 import java.lang.reflect.Array;
+
+import in.championswimmer.sfg.lib.SimpleFingerGestures;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -51,6 +57,26 @@ public class MainActivity extends AppCompatActivity
     // Write a message to the database
     Museo ms = new Museo("Fundacion Rodriguez-Acosta");
     FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+
+    SimpleTwoFingerDoubleTapDetector multiTouchListener = new SimpleTwoFingerDoubleTapDetector() {
+        @Override
+        public void onTwoFingerDoubleTap() {
+            // Do what you want here, I used a Toast for demonstration
+            Toast.makeText(getApplicationContext(), "Two Finger Double Tap", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    // Override onCreate() and anything else you want
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if(multiTouchListener.onTouchEvent(event))
+            return true;
+        return super.onTouchEvent(event);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +105,57 @@ public class MainActivity extends AppCompatActivity
         //Codigo añadido por mi
         FirebaseMuseo msfire = new FirebaseMuseo(database);
         msfire.traerDatosMuseo(ms);
+
+        final TextView grtv = findViewById(R.id.txtObras);
+        SimpleFingerGestures mySfg = new SimpleFingerGestures();
+        mySfg.setDebug(true);
+        mySfg.setConsumeTouchEvents(true);
+        mySfg.setOnFingerGestureListener(new SimpleFingerGestures.OnFingerGestureListener() {
+            @Override
+            public boolean onSwipeUp(int fingers, long gestureDuration, double gestureDistance) {
+                grtv.setText("swiped " + fingers + " up");
+                return false;
+            }
+
+            @Override
+            public boolean onSwipeDown(int fingers, long gestureDuration, double gestureDistance) {
+                grtv.setText("swiped " + fingers + " down");
+                return false;
+            }
+
+            @Override
+            public boolean onSwipeLeft(int fingers, long gestureDuration, double gestureDistance) {
+                grtv.setText("swiped " + fingers + " left");
+                return false;
+            }
+
+            @Override
+            public boolean onSwipeRight(int fingers, long gestureDuration, double gestureDistance) {
+                grtv.setText("swiped " + fingers + " right");
+                return false;
+            }
+
+            @Override
+            public boolean onPinch(int fingers, long gestureDuration, double gestureDistance) {
+                grtv.setText("pinch");
+                return false;
+            }
+
+            @Override
+            public boolean onUnpinch(int fingers, long gestureDuration, double gestureDistance) {
+                grtv.setText("unpinch");
+                return false;
+            }
+
+            @Override
+            public boolean onDoubleTap(int fingers) {
+                grtv.setText("double tap "+ fingers);
+
+                return false;
+            }
+        });
+        ScrollView layautMain = findViewById(R.id.layautmain);
+        layautMain.setOnTouchListener(mySfg);
 
         //Cuando pasan 6 segundos ejecuta esa funcion
         /*

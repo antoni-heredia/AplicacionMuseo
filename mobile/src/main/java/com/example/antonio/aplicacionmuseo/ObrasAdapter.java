@@ -1,5 +1,7 @@
 package com.example.antonio.aplicacionmuseo;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,9 +13,11 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+
 public class ObrasAdapter extends RecyclerView.Adapter<ObrasAdapter.ObraViewHolder> {
     private List<Obra> items;
-
+    static  private Museo ms;
+    private static Context context;
     public static class ObraViewHolder extends RecyclerView.ViewHolder {
         // Campos respectivos de un item
         public ImageView imagen;
@@ -23,15 +27,25 @@ public class ObrasAdapter extends RecyclerView.Adapter<ObrasAdapter.ObraViewHold
 
         public ObraViewHolder(View v) {
             super(v);
-            imagen = (ImageView) v.findViewById(R.id.imagen);
-            nombre = (TextView) v.findViewById(R.id.nombre);
-            nombreColeccion = (TextView) v.findViewById(R.id.nombreColeccion);
+            imagen = (ImageView) v.findViewById(R.id.imgOBras);
+            nombre = (TextView) v.findViewById(R.id.txtSalas);
+            nombreColeccion = (TextView) v.findViewById(R.id.txtDescripcionObras);
             idObra = (TextView) v.findViewById(R.id.idObra);
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    ms.getObraId(Integer.parseInt((String) idObra.getText()));
+                    Intent intent = new Intent(context, Informacion_obra.class);
+                    intent.putExtra("museo",ms);
+                    context.startActivity(intent);
+                }
+            });
         }
     }
 
-    public ObrasAdapter(List<Obra> items) {
-        this.items = items;
+    public ObrasAdapter(Museo ms, Context context) {
+        this.ms = ms;
+        this.items = ms.obras;
+        this.context = context;
     }
 
     @Override
@@ -51,6 +65,6 @@ public class ObrasAdapter extends RecyclerView.Adapter<ObrasAdapter.ObraViewHold
         Picasso.get().load(items.get(i).url).into(viewHolder.imagen);
         viewHolder.nombre.setText(items.get(i).nombreObra);
         viewHolder.nombreColeccion.setText("Coleccion:"+String.valueOf(items.get(i).coleccion.nombreColeccion));
-        viewHolder.idObra.setText("Id de la obra:"+String.valueOf(items.get(i).id));;
+        viewHolder.idObra.setText(String.valueOf(items.get(i).id));;
     }
 }

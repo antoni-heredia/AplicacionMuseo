@@ -74,7 +74,7 @@ public class MainActivity extends VoiceActivity
 
     //Connection to DialogFlow
     private AIDataService aiDataService=null;
-    private final String ACCESS_TOKEN = "3134e226534c4eebb298a914ff899615";   //TODO: INSERT YOUR ACCESS TOKEN
+    private final String ACCESS_TOKEN = "";   //TODO: INSERT YOUR ACCESS TOKEN
 
     public final String TIPO_SALA = "sala";
     public final String TIPO_OBRA = "obra";

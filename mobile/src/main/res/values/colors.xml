@@ -3,4 +3,9 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#d68aa6</color>
+    <color name="speechbtn_default">#EEEEEE</color>
+    <color name="speechbtn_listening">#99FFBB</color>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 </resources>

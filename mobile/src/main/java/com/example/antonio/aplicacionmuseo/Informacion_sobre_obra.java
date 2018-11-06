@@ -2,10 +2,10 @@ package com.example.antonio.aplicacionmuseo;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,19 +15,28 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-public class VisualizacionObras extends AppCompatActivity
+import com.squareup.picasso.Picasso;
+
+public class Informacion_sobre_obra extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private RecyclerView recycler;
-    private RecyclerView.Adapter adapter;
-    private RecyclerView.LayoutManager lManager;
-    Museo ms = new Museo("Fundacion Rodriguez-Acosta");
+
+    private TextView mTextMessage;
+    private Museo ms;
+
+    private String[] mPlanetTitles;
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_visualizacion_obras);
+        setContentView(R.layout.activity_informacion_sobre_obra);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -49,10 +58,35 @@ public class VisualizacionObras extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+
+
+
+
         //traemos los datos de la actividad anterior
         Intent intent = getIntent();
         ms = (Museo) intent.getSerializableExtra("museo");
-        mostrarDatos();
+        ConstraintLayout cl = findViewById(R.id.layaoutObra);
+
+        cl.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
+            public void onSwipeTop() {
+                Toast.makeText(getApplicationContext(), "top", Toast.LENGTH_SHORT).show();
+            }
+            public void onSwipeRight() {
+                ms.getObraSiguiente();
+                loadObraActual();
+            }
+            public void onSwipeLeft() {
+                ms.getObraAnterior();
+                loadObraActual();
+            }
+            public void onSwipeBottom() {
+                Toast.makeText(getApplicationContext(), "bottom", Toast.LENGTH_SHORT).show();
+            }
+
+        });
+
+
+        loadObraActual();
     }
 
     @Override
@@ -68,7 +102,7 @@ public class VisualizacionObras extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.visualizacion_obras, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -99,6 +133,8 @@ public class VisualizacionObras extends AppCompatActivity
             Intent intent = new Intent(getApplicationContext(), VisualizacionObras.class);
             intent.putExtra("museo",ms);
             startActivity(intent);
+            this.finish();
+
         } else if (id == R.id.nav_colecciones) {
 
         } else if (id == R.id.nav_salas) {
@@ -107,8 +143,6 @@ public class VisualizacionObras extends AppCompatActivity
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.putExtra("museo",ms);
             startActivity(intent);
-            finish();
-
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
@@ -120,19 +154,16 @@ public class VisualizacionObras extends AppCompatActivity
         return true;
     }
 
-    private void mostrarDatos(){
 
-        // Obtener el Recycler
-        recycler = (RecyclerView) findViewById(R.id.reciclador);
-        recycler.setHasFixedSize(true);
 
-        // Usar un administrador para LinearLayout
-        lManager = new LinearLayoutManager(this);
-        recycler.setLayoutManager(lManager);
 
-        // Crear un nuevo adaptador
-        adapter = new ObrasAdapter(ms);
-        recycler.setAdapter(adapter);
+
+    private void loadObraActual(){
+        ImageView iv = findViewById(R.id.imagenObra);
+        Picasso.get().load(ms.getObraActual().url).into(iv);
+        TextView txt = findViewById(R.id.descripcionObra);
+        txt.setText(ms.getObraActual().descripcion);
+        setTitle(ms.getObraActual().nombreObra);
     }
 
 }

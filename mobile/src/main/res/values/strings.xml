@@ -39,5 +39,6 @@
     <string name="asr_error_server">Server sends error status</string>
     <string name="asr_error_speechtimeout">No speech input detected</string>
     <string name="asr_notstarted">Speech recognition could not be started</string>
+    <string name="title_activity_visualizacion_salas">visualizacion_salas</string>
 
 </resources>

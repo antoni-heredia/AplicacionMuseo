@@ -16,7 +16,7 @@ import java.util.List;
 
 
 public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.SalasViewHolder> {
-    private List<Obra> items;
+    private List<Sala> items;
     static  private Museo ms;
     public static class SalasViewHolder extends RecyclerView.ViewHolder {
         // Campos respectivos de un item
@@ -27,10 +27,10 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.SalasViewHol
 
         public SalasViewHolder(View v) {
             super(v);
-            imagen = (ImageView) v.findViewById(R.id.imgOBras);
+            imagen = (ImageView) v.findViewById(R.id.imgSalas);
             nombre = (TextView) v.findViewById(R.id.txtSalas);
-            nombreColeccion = (TextView) v.findViewById(R.id.txtDescripcionObras);
-            idObra = (TextView) v.findViewById(R.id.idObra);
+            nombreColeccion = (TextView) v.findViewById(R.id.txtDescripcionSala);
+            idObra = (TextView) v.findViewById(R.id.idSala);
             v.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
                     ms.getObraId(Integer.parseInt((String) idObra.getText()));
@@ -45,7 +45,7 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.SalasViewHol
 
     public SalasAdapter(Museo ms) {
         this.ms = ms;
-        this.items = ms.obras;
+        this.items = ms.salas;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.SalasViewHol
     @Override
     public SalasViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.card_view_obra, viewGroup, false);
+                .inflate(R.layout.card_view_sala, viewGroup, false);
         return new SalasViewHolder(v);
     }
 
@@ -64,9 +64,9 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.SalasViewHol
 
     @Override
     public void onBindViewHolder(SalasViewHolder viewHolder, int i) {
-        Picasso.get().load(items.get(i).url).into(viewHolder.imagen);
-        viewHolder.nombre.setText(items.get(i).nombreObra);
-        viewHolder.nombreColeccion.setText("Coleccion:"+String.valueOf(items.get(i).coleccion.nombreColeccion));
+        //Picasso.get().load(items.get(i)).into(viewHolder.imagen);
+        viewHolder.nombre.setText(items.get(i).nombre);
+        viewHolder.nombreColeccion.setText("Obras: :"+items.get(i).obras.size());
         viewHolder.idObra.setText(String.valueOf(items.get(i).id));;
     }
 }

@@ -1,14 +1,21 @@
 package com.example.antonio.aplicacionmuseo;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -18,6 +25,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.Constraints;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -41,6 +49,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.blikoon.qrcodescanner.QrCodeActivity;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -60,6 +69,9 @@ import ai.api.model.AIRequest;
 import ai.api.model.AIResponse;
 import ai.api.model.Result;
 import in.championswimmer.sfg.lib.SimpleFingerGestures;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
+
 public class MainActivity extends VoiceActivity
         implements NavigationView.OnNavigationItemSelectedListener  {
 
@@ -69,12 +81,13 @@ public class MainActivity extends VoiceActivity
     private static final String LOGTAG = "CHATBOT";
     private static final Integer ID_PROMPT_QUERY = 0;
     private static final Integer ID_PROMPT_INFO = 1;
+    private static final int MY_PERMISSIONS_REQUEST_CAMARA = 102;
 
     private long startListeningTime = 0; // To skip errors (see processAsrError method)
 
     //Connection to DialogFlow
     private AIDataService aiDataService=null;
-    private final String ACCESS_TOKEN = "";   //TODO: INSERT YOUR ACCESS TOKEN
+    private final String ACCESS_TOKEN = "3134e226534c4eebb298a914ff899615";   //TODO: INSERT YOUR ACCESS TOKEN
 
     public final String TIPO_SALA = "sala";
     public final String TIPO_OBRA = "obra";
@@ -83,6 +96,7 @@ public class MainActivity extends VoiceActivity
     Museo ms = new Museo("Fundacion Rodriguez-Acosta");
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
+    private static final int REQUEST_CODE_QR_SCAN = 101;
 
     SimpleTwoFingerDoubleTapDetector multiTouchListener = new SimpleTwoFingerDoubleTapDetector() {
         @Override
@@ -234,7 +248,27 @@ public class MainActivity extends VoiceActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_qr) {
-            // Handle the camera action
+
+            if (Build.VERSION.SDK_INT>Build.VERSION_CODES.LOLLIPOP_MR1) {// Marshmallow+
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED) {
+                    // Should we show an explanation?
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                        // Show an expanation to the user *asynchronously* -- don't block
+                        // this thread waiting for the user's response! After the user
+                        // sees the explanation, try again to request the permission.
+                    } else {
+                        // No se necesita dar una explicación al usuario, sólo pedimos el permiso.
+                        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA}, MY_PERMISSIONS_REQUEST_CAMARA );
+                        // MY_PERMISSIONS_REQUEST_CAMARA es una constante definida en la app. El método callback obtiene el resultado de la petición.
+                    }
+                }else{ //have permissions
+                 Intent i = new Intent(MainActivity.this,QrCodeActivity.class);
+                    startActivityForResult( i,REQUEST_CODE_QR_SCAN);                }
+            }else{ // Pre-Marshmallow
+                Intent i = new Intent(MainActivity.this,QrCodeActivity.class);
+                startActivityForResult( i,REQUEST_CODE_QR_SCAN);            }
+
+
         } else if (id == R.id.nav_obras) {
             Intent intent = new Intent(getApplicationContext(), VisualizacionObras.class);
             intent.putExtra("museo",ms);
@@ -242,7 +276,9 @@ public class MainActivity extends VoiceActivity
         } else if (id == R.id.nav_colecciones) {
 
         } else if (id == R.id.nav_salas) {
-
+            Intent intent = new Intent(getApplicationContext(), visualizacion_salas.class);
+            intent.putExtra("museo",ms);
+            startActivity(intent);
         } else if (id == R.id.nav_principal) {
 
         } else if (id == R.id.nav_share) {
@@ -634,5 +670,70 @@ public class MainActivity extends VoiceActivity
         Log.d(LOGTAG, "TTS starts speaking");
     }
 
+    //lector qr
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(resultCode != Activity.RESULT_OK)
+        {
+            Log.d(LOGTAG,"COULD NOT GET A GOOD RESULT.");
+            if(data==null)
+                return;
+            //Getting the passed result
+            String result = data.getStringExtra("com.blikoon.qrcodescanner.error_decoding_image");
+            if( result!=null)
+            {
+                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                alertDialog.setTitle("Scan Error");
+                alertDialog.setMessage("QR Code could not be scanned");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
+            return;
+
+        }
+        if(requestCode == REQUEST_CODE_QR_SCAN)
+        {
+            if(data==null)
+                return;
+            //Getting the passed result
+            String result = data.getStringExtra("com.blikoon.qrcodescanner.got_qr_scan_relult");
+            Log.d(LOGTAG,"Have scan result in your app activity :"+ result);
+            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+            alertDialog.setTitle("Scan result");
+            alertDialog.setMessage(result);
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CAMARA : {
+                // Si la petición es cancelada, el array resultante estará vacío.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // El permiso ha sido concedido.
+                    Intent i = new Intent(MainActivity.this,QrCodeActivity.class);
+                    startActivityForResult( i,REQUEST_CODE_QR_SCAN);
+                } else {
+                    // Permiso denegado, deshabilita la funcionalidad que depende de este permiso.
+                }
+                return;
+            }
+            // otros bloques de 'case' para controlar otros permisos de la aplicación
+        }
+    }
 }

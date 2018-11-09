@@ -22,7 +22,10 @@ class Museo implements Serializable {
       colecciones.add(coleccion);
     }
 
-    public void addObra(Obra obra) { obras.add(obra);}
+    public void addObra(Obra obra) {
+        obras.add(obra);
+        salas.get(obra.sala.id).obras.add(obra);
+        colecciones.get(obra.coleccion.id).obras.add(obra);}
     public void addSala(Sala sala){ salas.add(sala);}
     public Coleccion getColeccion(int id){
         for(Coleccion c : colecciones){
@@ -77,6 +80,7 @@ class Coleccion implements Serializable {
     int id;
     String nombreColeccion;
     String descripcion;
+    String url;
     ArrayList<Obra> obras;
 
     public Coleccion(int id) {
@@ -111,6 +115,7 @@ class Obra implements Serializable{
 class Sala implements Serializable{
     int id;
     String nombre;
+    String url;
     ArrayList<Obra> obras;
     public Sala(int id) {
         this.id = id;

@@ -12,35 +12,27 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/imgSalas"
+            android:id="@+id/imgColeccion"
             android:layout_width="100dp"
             android:layout_height="150dp"
             android:scaleType="centerCrop" />
+
         <TextView
+            android:id="@+id/txtColeccion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Large Text"
-            android:id="@+id/txtSalas"
-            android:layout_toRightOf="@+id/imgSalas"
             android:layout_alignParentTop="true"
-            android:layout_marginLeft="10dp" />
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/imgColeccion"
+            android:text="Large Text"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
-            android:id="@+id/txtDescripcionSala"
+            android:id="@+id/idColeccion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/txtSalas"
-            android:layout_alignLeft="@+id/txtSalas"
-            android:text="Small Text"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <TextView
-            android:id="@+id/idSala"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/txtDescripcionSala"
-            android:layout_alignLeft="@+id/txtSalas"
+            android:layout_below="@+id/txtColeccion"
+            android:layout_alignLeft="@+id/txtColeccion"
             android:text="Small Text"
             android:textAppearance="?android:attr/textAppearanceSmall" />
         <View

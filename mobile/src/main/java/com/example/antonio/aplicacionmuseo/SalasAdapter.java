@@ -1,8 +1,6 @@
 package com.example.antonio.aplicacionmuseo;
 
-import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,19 +21,19 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.SalasViewHol
         public ImageView imagen;
         public TextView nombre;
         public TextView nombreColeccion;
-        public TextView idObra;
+        public TextView idSala;
 
         public SalasViewHolder(View v) {
             super(v);
             imagen = (ImageView) v.findViewById(R.id.imgSalas);
             nombre = (TextView) v.findViewById(R.id.txtSalas);
             nombreColeccion = (TextView) v.findViewById(R.id.txtDescripcionSala);
-            idObra = (TextView) v.findViewById(R.id.idSala);
+            idSala = (TextView) v.findViewById(R.id.idSala);
             v.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
-                    ms.getObraId(Integer.parseInt((String) idObra.getText()));
-                    Intent intent = new Intent(v.getContext(), Informacion_sobre_obra.class);
+                    Intent intent = new Intent(v.getContext(), VisualizacionObras.class);
                     intent.putExtra("museo",ms);
+                    intent.putExtra("id_sala",Integer.parseInt((String) idSala.getText()));
                     v.getContext().startActivity(intent);
 
                 }
@@ -64,9 +62,9 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.SalasViewHol
 
     @Override
     public void onBindViewHolder(SalasViewHolder viewHolder, int i) {
-        //Picasso.get().load(items.get(i)).into(viewHolder.imagen);
+        Picasso.get().load(items.get(i).url).into(viewHolder.imagen);
         viewHolder.nombre.setText(items.get(i).nombre);
         viewHolder.nombreColeccion.setText("Obras: :"+items.get(i).obras.size());
-        viewHolder.idObra.setText(String.valueOf(items.get(i).id));;
+        viewHolder.idSala.setText(String.valueOf(items.get(i).id));;
     }
 }

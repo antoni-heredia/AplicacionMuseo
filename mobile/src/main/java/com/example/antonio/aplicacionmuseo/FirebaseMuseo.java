@@ -41,6 +41,9 @@ public class FirebaseMuseo {
                         } else if (dsCampo.getKey().equals("Descripcion")) {
                             c.descripcion = dsCampo.getValue(String.class);
 
+                        }else if (dsCampo.getKey().equals("URL")) {
+                            c.url = dsCampo.getValue(String.class);
+
                         }
                     }
                     ms.addColeccion(c);
@@ -77,6 +80,9 @@ public class FirebaseMuseo {
                     for (DataSnapshot dsCampo : dsSala.getChildren()) {
                         if (dsCampo.getKey().equals("Nombre")) {
                             s.nombre = dsCampo.getValue(String.class);
+                        }else if (dsCampo.getKey().equals("URL")) {
+                            s.url = dsCampo.getValue(String.class);
+
                         }
                     }
                     ms.addSala(s);

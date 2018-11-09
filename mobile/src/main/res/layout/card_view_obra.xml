@@ -12,7 +12,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/imgOBras"
+            android:id="@+id/imgObras"
             android:layout_width="100dp"
             android:layout_height="150dp"
             android:scaleType="centerCrop" />
@@ -23,7 +23,7 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Large Text"
             android:id="@+id/txtSalas"
-            android:layout_toRightOf="@+id/imgOBras"
+            android:layout_toRightOf="@+id/imgObras"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="10dp" />
 
@@ -49,7 +49,7 @@
             android:background="#ffd5d5d5"
             android:id="@+id/linea"
             android:layout_above="@+id/compartir"
-            android:layout_toRightOf="@+id/imgOBras">
+            android:layout_toRightOf="@+id/imgObras">
 
         </View>
 

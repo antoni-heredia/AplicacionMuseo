@@ -1,6 +1,5 @@
 package com.example.antonio.aplicacionmuseo;
 
-import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -26,7 +25,7 @@ public class ObrasAdapter extends RecyclerView.Adapter<ObrasAdapter.ObraViewHold
 
         public ObraViewHolder(View v) {
             super(v);
-            imagen = (ImageView) v.findViewById(R.id.imgOBras);
+            imagen = (ImageView) v.findViewById(R.id.imgObras);
             nombre = (TextView) v.findViewById(R.id.txtSalas);
             nombreColeccion = (TextView) v.findViewById(R.id.txtDescripcionObras);
             idObra = (TextView) v.findViewById(R.id.idObra);
@@ -42,9 +41,9 @@ public class ObrasAdapter extends RecyclerView.Adapter<ObrasAdapter.ObraViewHold
         }
     }
 
-    public ObrasAdapter(Museo ms) {
+    public ObrasAdapter(Museo ms, List<Obra>obras) {
         this.ms = ms;
-        this.items = ms.obras;
+        this.items = obras;
     }
 
     @Override

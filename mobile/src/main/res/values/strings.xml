@@ -14,31 +14,33 @@
     <string name="title_activity_informacion_sobre_obra">Informacion sobre obra</string>
 
 
-    <string name="initial_prompt">Dime algo</string>
+    <string name="initial_prompt">En que te ayudo?</string>
 
-    <string name="check_internet_connection">Please check your Internet connection</string>
+    <string name="check_internet_connection">Por favor comprueba tu conexion a internet</string>
 
-    <string name="asr_permission">TalkBack must access the microphone in order to perform speech recognition</string>
-    <string name="asr_permission_notgranted">Sorry, TalkBack cannot work without accessing the microphone</string>
-    <string name="asr_notsupported">ASR not supported</string>
-    <string name="asr_results">Results ready :D</string>
-    <string name="asr_invalid_params">Invalid parameters for recognition</string>
-    <string name="asr_error">Speech recognition error</string>
-    <string name="asr_readyforspeech">Ready to hear you speak!</string>
-    <string name="asr_beginningofspeech">You have started talking ;)</string>
-    <string name="asr_buffer">Buffer received</string>
-    <string name="asr_endofspeech">You have stopped talking</string>
-    <string name="asr_parcialresult">Parcial results received</string>
-    <string name="asr_error_audio"> Audio recording error</string>
-    <string name="asr_error_client">Unknown client side error</string>
-    <string name="asr_error_permissions">Insufficient permissions</string>
-    <string name="asr_error_network">Network related error</string>
-    <string name="asr_error_networktimeout">Network operation timed out</string>
-    <string name="asr_error_nomatch">No recognition result matched</string>
-    <string name="asr_error_recognizerbusy">Recognition service busy</string>
-    <string name="asr_error_server">Server sends error status</string>
-    <string name="asr_error_speechtimeout">No speech input detected</string>
-    <string name="asr_notstarted">Speech recognition could not be started</string>
+    <string name="asr_permission">TalkBack debe acceder al micrófono para realizar el reconocimiento de voz</string>
+    <string name="asr_permission_notgranted">Lo siento, TalkBack no puede funcionar sin acceder el microfono</string>
+    <string name="asr_notsupported">ASR no soportado</string>
+    <string name="asr_results">Resultados listos</string>
+    <string name="asr_invalid_params">Parametros incorrectos para el reconocimiento</string>
+    <string name="asr_error">Error en el reconocimiento de voz</string>
+    <string name="asr_readyforspeech">Listo para escuchar!</string>
+    <string name="asr_beginningofspeech">Has empezado a hablar ;)</string>
+    <string name="asr_buffer">Buffer recibiendo</string>
+    <string name="asr_endofspeech">Has dejado de hablar</string>
+    <string name="asr_parcialresult">Resultado parcial recibido</string>
+    <string name="asr_error_audio">Error grabando el audio</string>
+    <string name="asr_error_client">Error del lado del cliente desconocido</string>
+    <string name="asr_error_permissions">Permisos insuficientes</string>
+    <string name="asr_error_network">Error relacionado con la red</string>
+    <string name="asr_error_networktimeout">Operaciones de red fuera de tiempo</string>
+    <string name="asr_error_nomatch">No hay coincidencias con el reconocimiento de voz</string>
+    <string name="asr_error_server">El servidor envia un codigo de error</string>
+    <string name="asr_error_speechtimeout">No se detecta entrada de voz</string>
+    <string name="asr_error_recognizerbusy">El reconocedor de voz esta ocupado</string>
+
+    <string name="asr_notstarted">El reconocimiento de voz no se encuentra disponible</string>
     <string name="title_activity_visualizacion_salas">visualizacion_salas</string>
+    <string name="title_activity_visualizacion_colecciones">Colecciones</string>
 
 </resources>

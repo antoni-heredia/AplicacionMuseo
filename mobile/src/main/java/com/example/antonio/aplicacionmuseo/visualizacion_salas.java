@@ -1,7 +1,10 @@
 package com.example.antonio.aplicacionmuseo;
 
 import android.content.Intent;
+import android.nfc.NdefMessage;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,7 +37,7 @@ public class visualizacion_salas extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.id_listener);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -143,5 +146,50 @@ public class visualizacion_salas extends AppCompatActivity
         // Crear un nuevo adaptador
         adapter = new SalasAdapter(ms);
         recycler.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
+            Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+            if (rawMessages != null) {
+                NdefMessage[] rawMsgs = new NdefMessage[rawMessages.length];
+                for (int i = 0; i < rawMessages.length; i++) {
+                    rawMsgs[i] = (NdefMessage) rawMessages[i];
+                }
+                // only one message sent during the beam
+                NdefMessage msg = (NdefMessage) rawMsgs[0];
+                String s = new String(msg.getRecords()[0].getPayload());
+                //Elimino los 3 primeros caracteres que aparecen ya que no son validos,
+                // no entiendo muy bien el porque ocurre
+                manejoEtiquetaNfc(s.substring(3));
+            }
+        }
+    }
+
+
+    protected  void manejoEtiquetaNfc(String text){
+        String[] registros = text.split(":");
+        String tipo = registros[0];
+        int id = Integer.parseInt(registros[1]);
+        if(tipo.toLowerCase().equals(MainActivity.TIPO_OBRA)){
+            ms.getObraId(id);
+            Intent intent = new Intent(getApplicationContext(), Informacion_sobre_obra.class);
+            intent.putExtra("museo",ms);
+            startActivity(intent);
+        }else if ( tipo.toLowerCase().equals(MainActivity.TIPO_SALA)){
+            Intent intent = new Intent(getApplicationContext(), VisualizacionObras.class);
+            intent.putExtra("museo",ms);
+            intent.putExtra("id_sala",id);
+            startActivity(intent);
+        }else if ( tipo.toLowerCase().equals(MainActivity.TIPO_COLECCION)){
+            Intent intent = new Intent(getApplicationContext(), VisualizacionObras.class);
+            intent.putExtra("museo",ms);
+            intent.putExtra("id_coleccion",id);
+            startActivity(intent);
+        }
+
     }
 }

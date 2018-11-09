@@ -1,14 +1,23 @@
 package com.example.antonio.aplicacionmuseo;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,23 +28,35 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class VisualizacionObras extends AppCompatActivity
+import com.blikoon.qrcodescanner.QrCodeActivity;
+import com.google.firebase.database.FirebaseDatabase;
+
+public class visualizacionColecciones extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final String LOGTAG = "CHATBOT";
     private RecyclerView recycler;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager lManager;
+    // Write a message to the database
     Museo ms = new Museo("Fundacion Rodriguez-Acosta");
-    private int id_sala = -1;
-    private int id_coleccion= -1;
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_visualizacion_obras);
+        setContentView(R.layout.activity_visualizacion_colecciones);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.id_listener);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -46,13 +67,11 @@ public class VisualizacionObras extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //traemos los datos de la actividad anterior
+        //Codigo añadido por mi
         Intent intent = getIntent();
         ms = (Museo) intent.getSerializableExtra("museo");
-        if (intent.hasExtra("id_sala"))
-            id_sala = (Integer) intent.getSerializableExtra("id_sala");
-        if (intent.hasExtra("id_coleccion"))
-            id_coleccion = (Integer) intent.getSerializableExtra("id_coleccion");
+
+
 
         mostrarDatos();
     }
@@ -70,7 +89,7 @@ public class VisualizacionObras extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.visualizacion_obras, menu);
+        getMenuInflater().inflate(R.menu.visualizacion_colecciones, menu);
         return true;
     }
 
@@ -96,7 +115,27 @@ public class VisualizacionObras extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_qr) {
-            // Handle the camera action
+
+            if (Build.VERSION.SDK_INT>Build.VERSION_CODES.LOLLIPOP_MR1) {// Marshmallow+
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED) {
+                    // Should we show an explanation?
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                        // Show an expanation to the user *asynchronously* -- don't block
+                        // this thread waiting for the user's response! After the user
+                        // sees the explanation, try again to request the permission.
+                    } else {
+                        // No se necesita dar una explicación al usuario, sólo pedimos el permiso.
+                        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA}, MainActivity.MY_PERMISSIONS_REQUEST_CAMARA );
+                        // MY_PERMISSIONS_REQUEST_CAMARA es una constante definida en la app. El método callback obtiene el resultado de la petición.
+                    }
+                }else{ //have permissions
+                    Intent i = new Intent(getApplicationContext(),QrCodeActivity.class);
+                    startActivityForResult( i,MainActivity.REQUEST_CODE_QR_SCAN);                }
+            }else{ // Pre-Marshmallow
+                Intent i = new Intent(getApplicationContext(),QrCodeActivity.class);
+                startActivityForResult( i,MainActivity.REQUEST_CODE_QR_SCAN);            }
+
+
         } else if (id == R.id.nav_obras) {
             Intent intent = new Intent(getApplicationContext(), VisualizacionObras.class);
             intent.putExtra("museo",ms);
@@ -104,12 +143,10 @@ public class VisualizacionObras extends AppCompatActivity
         } else if (id == R.id.nav_colecciones) {
 
         } else if (id == R.id.nav_salas) {
-
-        } else if (id == R.id.nav_principal) {
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            Intent intent = new Intent(getApplicationContext(), visualizacion_salas.class);
             intent.putExtra("museo",ms);
             startActivity(intent);
-            finish();
+        } else if (id == R.id.nav_principal) {
 
         } else if (id == R.id.nav_share) {
 
@@ -122,6 +159,7 @@ public class VisualizacionObras extends AppCompatActivity
         return true;
     }
 
+
     private void mostrarDatos(){
 
         // Obtener el Recycler
@@ -133,14 +171,74 @@ public class VisualizacionObras extends AppCompatActivity
         recycler.setLayoutManager(lManager);
 
         // Crear un nuevo adaptador
-        if(id_coleccion >= 0)
-            adapter = new ObrasAdapter(ms,ms.colecciones.get(id_coleccion).obras);
-        else if(id_sala  >= 0)
-            adapter = new ObrasAdapter(ms,ms.salas.get(id_sala).obras);
-        else
-            adapter = new ObrasAdapter(ms,ms.obras);
-
+        adapter = new ColeccionAdapter(ms);
         recycler.setAdapter(adapter);
+    }
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(resultCode != Activity.RESULT_OK)
+        {
+            Log.d(LOGTAG,"COULD NOT GET A GOOD RESULT.");
+            if(data==null)
+                return;
+            //Getting the passed result
+            String result = data.getStringExtra("com.blikoon.qrcodescanner.error_decoding_image");
+            if( result!=null)
+            {
+                AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext()).create();
+                alertDialog.setTitle("Scan Error");
+                alertDialog.setMessage("QR Code could not be scanned");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
+            return;
+
+        }
+        if(requestCode == MainActivity.REQUEST_CODE_QR_SCAN)
+        {
+            if(data==null)
+                return;
+            //Getting the passed result
+            String result = data.getStringExtra("com.blikoon.qrcodescanner.got_qr_scan_relult");
+            Log.d(LOGTAG,"Have scan result in your app activity :"+ result);
+            AlertDialog alertDialog = new AlertDialog.Builder(getApplicationContext()).create();
+            alertDialog.setTitle("Scan result");
+            alertDialog.setMessage(result);
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MainActivity.MY_PERMISSIONS_REQUEST_CAMARA : {
+                // Si la petición es cancelada, el array resultante estará vacío.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // El permiso ha sido concedido.
+                    Intent i = new Intent(getApplicationContext(),QrCodeActivity.class);
+                    startActivityForResult( i,MainActivity.REQUEST_CODE_QR_SCAN);
+                } else {
+                    // Permiso denegado, deshabilita la funcionalidad que depende de este permiso.
+                }
+                return;
+            }
+            // otros bloques de 'case' para controlar otros permisos de la aplicación
+        }
     }
 
     @Override
@@ -187,5 +285,4 @@ public class VisualizacionObras extends AppCompatActivity
         }
 
     }
-
 }

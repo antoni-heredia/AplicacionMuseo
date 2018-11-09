@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -45,6 +47,7 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,6 +74,7 @@ import ai.api.model.Result;
 import in.championswimmer.sfg.lib.SimpleFingerGestures;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
+import com.squareup.picasso.Picasso;
 
 public class MainActivity extends VoiceActivity
         implements NavigationView.OnNavigationItemSelectedListener  {
@@ -78,25 +82,25 @@ public class MainActivity extends VoiceActivity
     /*
     Declarar instancias globales
     */
-    private static final String LOGTAG = "CHATBOT";
-    private static final Integer ID_PROMPT_QUERY = 0;
-    private static final Integer ID_PROMPT_INFO = 1;
-    private static final int MY_PERMISSIONS_REQUEST_CAMARA = 102;
+    public static final String LOGTAG = "CHATBOT";
+    public static final Integer ID_PROMPT_QUERY = 0;
+    public static final Integer ID_PROMPT_INFO = 1;
+    public static final int MY_PERMISSIONS_REQUEST_CAMARA = 102;
 
     private long startListeningTime = 0; // To skip errors (see processAsrError method)
 
     //Connection to DialogFlow
-    private AIDataService aiDataService=null;
-    private final String ACCESS_TOKEN = "3134e226534c4eebb298a914ff899615";   //TODO: INSERT YOUR ACCESS TOKEN
+    public AIDataService aiDataService=null;
+    public final String ACCESS_TOKEN = "3134e226534c4eebb298a914ff899615";   //TODO: INSERT YOUR ACCESS TOKEN
 
-    public final String TIPO_SALA = "sala";
-    public final String TIPO_OBRA = "obra";
-    public final String TIPO_COLECCION = "coleccion";
+    public static final String TIPO_SALA = "sala";
+    public static final String TIPO_OBRA = "obra";
+    public static final String TIPO_COLECCION = "coleccion";
     // Write a message to the database
     Museo ms = new Museo("Fundacion Rodriguez-Acosta");
     FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-    private static final int REQUEST_CODE_QR_SCAN = 101;
+    public static final int REQUEST_CODE_QR_SCAN = 101;
 
     SimpleTwoFingerDoubleTapDetector multiTouchListener = new SimpleTwoFingerDoubleTapDetector() {
         @Override
@@ -146,6 +150,16 @@ public class MainActivity extends VoiceActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        ImageView imagen = findViewById(R.id.imgSala);
+
+        Picasso.get().load("https://media-cdn.tripadvisor.com/media/photo-s/0f/c3/27/37/sala-museo.jpg").into(imagen);
+        imagen = findViewById(R.id.imgObras);
+        Picasso.get().load("http://www.granadatur.com/media/cache/f3/79/f37955e5bd804561ef810ce8a815b7ab.jpg").into(imagen);
+        imagen = findViewById(R.id.imgColecciones);
+        Picasso.get().load("http://www.fundacionrodriguezacosta.com/fileadmin/user_upload/img_background/fundacion-rodriguez-acosta001.jpg").into(imagen);
+
+
+
         //Codigo añadido por mi
         Intent intent = getIntent();
         ms = (Museo) intent.getSerializableExtra("museo");
@@ -164,12 +178,30 @@ public class MainActivity extends VoiceActivity
             @Override
             public boolean onSwipeUp(int fingers, long gestureDuration, double gestureDistance) {
                 grtv.setText("swiped " + fingers + " up");
+                if(fingers == 3){
+                    FloatingActionButton speak = findViewById(R.id.id_listener);
+                    speak.setEnabled(true);
+                    speak.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
+                    speak.setRippleColor(ColorStateList.valueOf(Color.GREEN));
+                    speak.show();
+                    iniciarTTS();
+
+
+                }
                 return false;
             }
 
             @Override
             public boolean onSwipeDown(int fingers, long gestureDuration, double gestureDistance) {
                 grtv.setText("swiped " + fingers + " down");
+                if(fingers == 3){
+                    shutdown();
+                    FloatingActionButton speak = findViewById(R.id.id_listener);
+                    speak.setEnabled(false);
+                    speak.hide();
+
+
+                }
                 return false;
             }
 
@@ -274,7 +306,9 @@ public class MainActivity extends VoiceActivity
             intent.putExtra("museo",ms);
             startActivity(intent);
         } else if (id == R.id.nav_colecciones) {
-
+            Intent intent = new Intent(getApplicationContext(), visualizacionColecciones.class);
+            intent.putExtra("museo",ms);
+            startActivity(intent);
         } else if (id == R.id.nav_salas) {
             Intent intent = new Intent(getApplicationContext(), visualizacion_salas.class);
             intent.putExtra("museo",ms);
@@ -332,9 +366,15 @@ public class MainActivity extends VoiceActivity
             intent.putExtra("museo",ms);
             startActivity(intent);
         }else if ( tipo.toLowerCase().equals(TIPO_SALA)){
-
+            Intent intent = new Intent(getApplicationContext(), VisualizacionObras.class);
+            intent.putExtra("museo",ms);
+            intent.putExtra("id_sala",id);
+            startActivity(intent);
         }else if ( tipo.toLowerCase().equals(TIPO_COLECCION)){
-
+            Intent intent = new Intent(getApplicationContext(), VisualizacionObras.class);
+            intent.putExtra("museo",ms);
+            intent.putExtra("id_coleccion",id);
+            startActivity(intent);
         }
 
     }
@@ -354,7 +394,10 @@ public class MainActivity extends VoiceActivity
             public void onClick(View v) {
                 //Ask the user to speak
                 try {
+                    FloatingActionButton speak = findViewById(R.id.id_listener);
+                    speak.setEnabled(false);
                     speak(getResources().getString(R.string.initial_prompt), "ES", ID_PROMPT_QUERY);
+
                 } catch (Exception e) {
                     Log.e(LOGTAG, "TTS not accessible");
                 }
@@ -384,7 +427,6 @@ public class MainActivity extends VoiceActivity
      * If there is any error, the <code>onAsrError</code> method is invoked.
      */
     private void startListening() {
-
         if (deviceConnectedToInternet()) {
             try {
 
@@ -395,7 +437,7 @@ public class MainActivity extends VoiceActivity
                  */
                 startListeningTime = System.currentTimeMillis();
                 Locale spanish = new Locale("es", "ES");
-                listen(spanish, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM, 1); //Start listening
+                listen(spanish, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM, 1); //Start
             } catch (Exception e) {
                 this.runOnUiThread(new Runnable() {  //Toasts must be in the main thread
                     public void run() {
@@ -444,8 +486,10 @@ public class MainActivity extends VoiceActivity
      * * It changes the color and the message of the speech button
      */
     private void changeButtonAppearanceToListening() {
+        FloatingActionButton speak = findViewById(R.id.id_listener);
+        speak.setEnabled(false);
         FloatingActionButton button = findViewById(R.id.id_listener); //Obtains a reference to the button
-        button.getBackground().setColorFilter(ContextCompat.getColor(this, R.color.speechbtn_listening), PorterDuff.Mode.MULTIPLY);  //Changes the button's background to the color obtained from the resources folder
+        button.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
     }
 
     /**
@@ -454,7 +498,7 @@ public class MainActivity extends VoiceActivity
      */
     private void changeButtonAppearanceToDefault() {
         FloatingActionButton button = findViewById(R.id.id_listener); //Obtains a reference to the button
-        button.getBackground().setColorFilter(ContextCompat.getColor(this, R.color.speechbtn_default), PorterDuff.Mode.MULTIPLY);    //Changes the button's background to the color obtained from the resources folder
+        button.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
     }
 
     /**
@@ -506,6 +550,8 @@ public class MainActivity extends VoiceActivity
                     errorMsg = R.string.asr_error; //Another frequent error that is not really due to the ASR, we will ignore it
                     break;
             }
+            FloatingActionButton speak = findViewById(R.id.id_listener);
+            speak.setEnabled(true);
             String msg = getResources().getString(errorMsg);
             this.runOnUiThread(new Runnable() { //Toasts must be in the main thread
                 public void run() {
@@ -538,7 +584,9 @@ public class MainActivity extends VoiceActivity
             }
         }
     }
-
+    private void iniciarTTS(){
+        initSpeechInputOutput(this);
+    }
     /**
      * Connects to DialogFlow sending the user input in text form
      * @param userInput recognized utterance
@@ -569,8 +617,8 @@ public class MainActivity extends VoiceActivity
                     return response;
                 } catch (AIServiceException e) {
                     try {
-                        speak("Could not retrieve a response from DialogFlow", "Spanish", ID_PROMPT_INFO);
-                        Log.e(LOGTAG,"Problems retrieving a response");
+                        speak("No se puede obtener resultado de DialogFlow", "Spanish", ID_PROMPT_INFO);
+                        Log.e(LOGTAG,"Problemas trayendo los resultados");
                     } catch (Exception ex) {
                         Log.e(LOGTAG, "El español no esta disponible");
                     }

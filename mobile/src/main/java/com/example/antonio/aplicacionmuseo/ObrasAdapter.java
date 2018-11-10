@@ -22,6 +22,8 @@ public class ObrasAdapter extends RecyclerView.Adapter<ObrasAdapter.ObraViewHold
         public TextView nombre;
         public TextView nombreColeccion;
         public TextView idObra;
+        public ImageView compartir;
+        public TextView urlImagen;
 
         public ObraViewHolder(View v) {
             super(v);
@@ -36,6 +38,17 @@ public class ObrasAdapter extends RecyclerView.Adapter<ObrasAdapter.ObraViewHold
                     intent.putExtra("museo",ms);
                     v.getContext().startActivity(intent);
 
+                }
+            });
+            compartir = (ImageView) v.findViewById(R.id.compartir);
+            urlImagen = (TextView) v.findViewById(R.id.urlimagen);
+            compartir.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_TEXT, "Estoy viendo la obra "+nombre.getText()+" en el museo Fundacion Rodriguez Acosta."+urlImagen.getText());
+                    v.getContext().startActivity(Intent.createChooser(intent, "Share with"));
                 }
             });
         }
@@ -64,5 +77,7 @@ public class ObrasAdapter extends RecyclerView.Adapter<ObrasAdapter.ObraViewHold
         viewHolder.nombre.setText(items.get(i).nombreObra);
         viewHolder.nombreColeccion.setText("Coleccion:"+String.valueOf(items.get(i).coleccion.nombreColeccion));
         viewHolder.idObra.setText(String.valueOf(items.get(i).id));;
+        viewHolder.urlImagen.setText(String.valueOf(items.get(i).url));;
+
     }
 }

@@ -5,7 +5,7 @@
     <string name="nav_header_title">Fundacion Rodriguez Acosta</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Ajustes</string>
+    <string name="action_settings">Ir al museo</string>
     <string name="title_activity_informacion_obra">Informacion obra</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
@@ -40,7 +40,7 @@
     <string name="asr_error_recognizerbusy">El reconocedor de voz esta ocupado</string>
 
     <string name="asr_notstarted">El reconocimiento de voz no se encuentra disponible</string>
-    <string name="title_activity_visualizacion_salas">visualizacion_salas</string>
+    <string name="title_activity_visualizacion_salas">Salas del museo</string>
     <string name="title_activity_visualizacion_colecciones">Colecciones</string>
 
 </resources>

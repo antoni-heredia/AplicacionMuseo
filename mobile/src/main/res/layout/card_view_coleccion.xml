@@ -31,6 +31,13 @@
             android:id="@+id/idColeccion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="TextView"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/cantidadObras"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_below="@+id/txtColeccion"
             android:layout_alignLeft="@+id/txtColeccion"
             android:text="Small Text"

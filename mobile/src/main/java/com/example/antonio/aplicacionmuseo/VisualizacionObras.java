@@ -15,6 +15,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
@@ -194,6 +195,9 @@ public class VisualizacionObras extends VoiceActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                    Uri.parse("https://www.google.com.br/maps/place/Fundaci%C3%B3n+Rodr%C3%ADguez-Acosta/@37.1749117,-3.5943478,17z/data=!3m1!4b1!4m5!3m4!1s0xd71fcb9c6c9db65:0xfa1f0e636168d728!8m2!3d37.1749074!4d-3.5921591"));
+            startActivity(intent);
             return true;
         }
 

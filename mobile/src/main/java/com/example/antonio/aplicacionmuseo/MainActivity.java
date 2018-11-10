@@ -34,6 +34,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -245,6 +246,34 @@ public class MainActivity extends VoiceActivity
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
 
+        CardView cardObra = findViewById(R.id.cardObra);
+        CardView cardColeccion = findViewById(R.id.cardColecciones);
+        CardView cardSalas = findViewById(R.id.cardSalas);
+        cardObra.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), VisualizacionObras.class);
+                intent.putExtra("museo",ms);
+                startActivity(intent);
+            }
+        });
+        cardColeccion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), visualizacionColecciones.class);
+                intent.putExtra("museo",ms);
+                startActivity(intent);
+            }
+        });
+        cardSalas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), visualizacion_salas.class);
+                intent.putExtra("museo",ms);
+                startActivity(intent);
+            }
+        });
+
     }
     protected void onPause() {
         super.onPause();
@@ -322,6 +351,9 @@ public class MainActivity extends VoiceActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+            Uri.parse("https://www.google.com.br/maps/place/Fundaci%C3%B3n+Rodr%C3%ADguez-Acosta/@37.1749117,-3.5943478,17z/data=!3m1!4b1!4m5!3m4!1s0xd71fcb9c6c9db65:0xfa1f0e636168d728!8m2!3d37.1749074!4d-3.5921591"));
+            startActivity(intent);
             return true;
         }
 
@@ -369,10 +401,6 @@ public class MainActivity extends VoiceActivity
             intent.putExtra("museo",ms);
             startActivity(intent);
         } else if (id == R.id.nav_principal) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
 
         }
 

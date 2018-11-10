@@ -22,6 +22,7 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.SalasViewHol
         public TextView nombre;
         public TextView nombreColeccion;
         public TextView idSala;
+        public ImageView compartir;
 
         public SalasViewHolder(View v) {
             super(v);
@@ -36,6 +37,17 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.SalasViewHol
                     intent.putExtra("id_sala",Integer.parseInt((String) idSala.getText()));
                     v.getContext().startActivity(intent);
 
+                }
+            });
+
+            compartir = (ImageView) v.findViewById(R.id.compartir);
+            compartir.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_TEXT, "Estoy en la sala "+nombre.getText()+"del museo Fundacion Rodriguez Acosta.");
+                    v.getContext().startActivity(Intent.createChooser(intent, "Share with"));
                 }
             });
         }
@@ -64,7 +76,7 @@ public class SalasAdapter extends RecyclerView.Adapter<SalasAdapter.SalasViewHol
     public void onBindViewHolder(SalasViewHolder viewHolder, int i) {
         Picasso.get().load(items.get(i).url).into(viewHolder.imagen);
         viewHolder.nombre.setText(items.get(i).nombre);
-        viewHolder.nombreColeccion.setText("Obras: :"+items.get(i).obras.size());
+        viewHolder.nombreColeccion.setText("Obras en la coleccion: "+items.get(i).obras.size());
         viewHolder.idSala.setText(String.valueOf(items.get(i).id));;
     }
 }

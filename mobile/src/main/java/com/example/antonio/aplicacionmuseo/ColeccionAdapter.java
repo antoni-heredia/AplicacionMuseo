@@ -21,11 +21,14 @@ public class ColeccionAdapter extends RecyclerView.Adapter<ColeccionAdapter.Cole
         public ImageView imagen;
         public TextView nombre;
         public TextView idColeccion;
-
+        public ImageView compartir;
+        public TextView cantidadObras;
         public ColeccionViewHolder(View v) {
             super(v);
             imagen = (ImageView) v.findViewById(R.id.imgColeccion);
             nombre = (TextView) v.findViewById(R.id.txtColeccion);
+            cantidadObras = (TextView) v.findViewById(R.id.cantidadObras);
+
             idColeccion = (TextView) v.findViewById(R.id.idColeccion);
             v.setOnClickListener(new View.OnClickListener() {
                 @Override public void onClick(View v) {
@@ -34,6 +37,17 @@ public class ColeccionAdapter extends RecyclerView.Adapter<ColeccionAdapter.Cole
                     intent.putExtra("id_coleccion",Integer.parseInt((String) idColeccion.getText()));
                     v.getContext().startActivity(intent);
 
+                }
+            });
+
+            compartir = (ImageView) v.findViewById(R.id.compartir);
+            compartir.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_TEXT, "Estoy viendo la coleccion "+nombre.getText()+" en el museo Fundacion Rodriguez Acosta.");
+                    v.getContext().startActivity(Intent.createChooser(intent, "Share with"));
                 }
             });
         }
@@ -62,6 +76,8 @@ public class ColeccionAdapter extends RecyclerView.Adapter<ColeccionAdapter.Cole
     public void onBindViewHolder(ColeccionViewHolder viewHolder, int i) {
         Picasso.get().load(items.get(i).url).into(viewHolder.imagen);
         viewHolder.nombre.setText(items.get(i).nombreColeccion);
-        viewHolder.idColeccion.setText(String.valueOf(items.get(i).id));;
+        viewHolder.idColeccion.setText(String.valueOf(items.get(i).id));
+        viewHolder.cantidadObras.setText("Obras en la coleccion: "+String.valueOf(items.get(i).obras.size()));
+
     }
 }

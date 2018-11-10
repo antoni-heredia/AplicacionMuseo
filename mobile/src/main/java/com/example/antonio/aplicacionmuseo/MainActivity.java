@@ -10,6 +10,10 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -77,11 +81,18 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.squareup.picasso.Picasso;
 
 public class MainActivity extends VoiceActivity
-        implements NavigationView.OnNavigationItemSelectedListener  {
+        implements NavigationView.OnNavigationItemSelectedListener,SensorEventListener {
 
     /*
     Declarar instancias globales
     */
+
+    private SensorManager senSensorManager;
+    private Sensor senAccelerometer;
+    private long lastUpdate = 0;
+    private float last_x, last_y, last_z;
+    private static final float SHAKE_THRESHOLD = 1000.0f;
+
     public static final String LOGTAG = "CHATBOT";
     public static final Integer ID_PROMPT_QUERY = 0;
     public static final Integer ID_PROMPT_INFO = 1;
@@ -91,7 +102,7 @@ public class MainActivity extends VoiceActivity
 
     //Connection to DialogFlow
     public AIDataService aiDataService=null;
-    public final String ACCESS_TOKEN = "3134e226534c4eebb298a914ff899615";   //TODO: INSERT YOUR ACCESS TOKEN
+    public static final String ACCESS_TOKEN = "3134e226534c4eebb298a914ff899615";   //TODO: INSERT YOUR ACCESS TOKEN
 
     public static final String TIPO_SALA = "sala";
     public static final String TIPO_OBRA = "obra";
@@ -170,14 +181,12 @@ public class MainActivity extends VoiceActivity
         }
 
 
-        final TextView grtv = findViewById(R.id.txtObras);
         SimpleFingerGestures mySfg = new SimpleFingerGestures();
         mySfg.setDebug(true);
         mySfg.setConsumeTouchEvents(true);
         mySfg.setOnFingerGestureListener(new SimpleFingerGestures.OnFingerGestureListener() {
             @Override
             public boolean onSwipeUp(int fingers, long gestureDuration, double gestureDistance) {
-                grtv.setText("swiped " + fingers + " up");
                 if(fingers == 3){
                     FloatingActionButton speak = findViewById(R.id.id_listener);
                     speak.setEnabled(true);
@@ -193,7 +202,6 @@ public class MainActivity extends VoiceActivity
 
             @Override
             public boolean onSwipeDown(int fingers, long gestureDuration, double gestureDistance) {
-                grtv.setText("swiped " + fingers + " down");
                 if(fingers == 3){
                     shutdown();
                     FloatingActionButton speak = findViewById(R.id.id_listener);
@@ -207,40 +215,87 @@ public class MainActivity extends VoiceActivity
 
             @Override
             public boolean onSwipeLeft(int fingers, long gestureDuration, double gestureDistance) {
-                grtv.setText("swiped " + fingers + " left");
                 return false;
             }
 
             @Override
             public boolean onSwipeRight(int fingers, long gestureDuration, double gestureDistance) {
-                grtv.setText("swiped " + fingers + " right");
                 return false;
             }
 
             @Override
             public boolean onPinch(int fingers, long gestureDuration, double gestureDistance) {
-                grtv.setText("pinch");
                 return false;
             }
 
             @Override
             public boolean onUnpinch(int fingers, long gestureDuration, double gestureDistance) {
-                grtv.setText("unpinch");
                 return false;
             }
 
             @Override
             public boolean onDoubleTap(int fingers) {
-                grtv.setText("double tap "+ fingers);
-
                 return false;
             }
         });
         ConstraintLayout layautMain = findViewById(R.id.layautmain);
         layautMain.setOnTouchListener(mySfg);
 
+        senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
+
+    }
+    protected void onPause() {
+        super.onPause();
+        senSensorManager.unregisterListener(this);
     }
 
+
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+
+        Sensor mySensor = sensorEvent.sensor;
+
+        if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float x = sensorEvent.values[0];
+            float y = sensorEvent.values[1];
+            float z = sensorEvent.values[2];
+            long curTime = System.currentTimeMillis();
+
+            if ((curTime - lastUpdate) > 200) {
+                long diffTime = (curTime - lastUpdate);
+                lastUpdate = curTime;
+                float speed = Math.abs(x + y + z - last_x - last_y - last_z)/ diffTime * 10000;
+
+                if (speed > SHAKE_THRESHOLD) {
+                    cambiarEstadoBoton();
+                }
+
+                last_x = x;
+                last_y = y;
+                last_z = z;
+            }
+        }
+    }
+
+    protected void cambiarEstadoBoton(){
+        shutdown();
+        iniciarTTS();
+        FloatingActionButton speak = findViewById(R.id.id_listener);
+
+        speak.setEnabled(true);
+            speak.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
+            speak.setRippleColor(ColorStateList.valueOf(Color.GREEN));
+
+
+
+    }
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -295,7 +350,7 @@ public class MainActivity extends VoiceActivity
                     }
                 }else{ //have permissions
                  Intent i = new Intent(MainActivity.this,QrCodeActivity.class);
-                    startActivityForResult( i,REQUEST_CODE_QR_SCAN);                }
+                startActivityForResult( i,REQUEST_CODE_QR_SCAN);                }
             }else{ // Pre-Marshmallow
                 Intent i = new Intent(MainActivity.this,QrCodeActivity.class);
                 startActivityForResult( i,REQUEST_CODE_QR_SCAN);            }
@@ -328,11 +383,6 @@ public class MainActivity extends VoiceActivity
 
 
 
-    private void Escribir(){
-        // Read from the database
-        DatabaseReference myRef = database.getReference("mensajeEnviado");
-        myRef.setValue("Hello, World!");
-    }
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -356,7 +406,7 @@ public class MainActivity extends VoiceActivity
     }
 
 
-    protected  void manejoEtiquetaNfc(String text){
+    protected void manejoEtiquetaNfc(String text){
         String[] registros = text.split(":");
         String tipo = registros[0];
         int id = Integer.parseInt(registros[1]);
@@ -753,17 +803,7 @@ public class MainActivity extends VoiceActivity
                 return;
             //Getting the passed result
             String result = data.getStringExtra("com.blikoon.qrcodescanner.got_qr_scan_relult");
-            Log.d(LOGTAG,"Have scan result in your app activity :"+ result);
-            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-            alertDialog.setTitle("Scan result");
-            alertDialog.setMessage(result);
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
+            manejoEtiquetaNfc(result);
 
         }
     }
@@ -784,4 +824,12 @@ public class MainActivity extends VoiceActivity
             // otros bloques de 'case' para controlar otros permisos de la aplicación
         }
     }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        iniciarTTS();
+        senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
 }

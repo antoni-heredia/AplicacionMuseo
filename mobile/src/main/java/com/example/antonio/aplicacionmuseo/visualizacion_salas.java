@@ -13,6 +13,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -64,6 +65,8 @@ public class visualizacion_salas extends VoiceActivity
 
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
+    private Sensor mProximity;
+    private static final int SENSOR_SENSITIVITY = 4;
     private long lastUpdate = 0;
     private float last_x, last_y, last_z;
     private static final int SHAKE_THRESHOLD = 400;
@@ -125,6 +128,8 @@ public class visualizacion_salas extends VoiceActivity
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
+        mProximity = senSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        senSensorManager.registerListener(this, mProximity , SensorManager.SENSOR_DELAY_NORMAL);
 
     }
 
@@ -158,6 +163,13 @@ public class visualizacion_salas extends VoiceActivity
                 last_x = x;
                 last_y = y;
                 last_z = z;
+            }
+        }
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_PROXIMITY) {
+            AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+            if (sensorEvent.values[0] >= -SENSOR_SENSITIVITY && sensorEvent.values[0] <= SENSOR_SENSITIVITY) {
+                cambiarEstadoBoton();
             }
         }
     }

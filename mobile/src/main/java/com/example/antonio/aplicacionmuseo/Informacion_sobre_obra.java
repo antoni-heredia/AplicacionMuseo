@@ -13,35 +13,29 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.nfc.NdefMessage;
-import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
-import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,9 +61,12 @@ public class Informacion_sobre_obra extends VoiceActivity
 
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
+    private Sensor mProximity;
+    private static final int SENSOR_SENSITIVITY = 4;
+
     private long lastUpdate = 0;
     private float last_x, last_y, last_z;
-    private static final int SHAKE_THRESHOLD = 400;
+    private static final int SHAKE_THRESHOLD = 800;
 
 
     private TextView mTextMessage;
@@ -80,7 +77,6 @@ public class Informacion_sobre_obra extends VoiceActivity
     private ListView mDrawerList;
     public AIDataService aiDataService = null;
     private long startListeningTime = 0; // To skip errors (see processAsrError method)
-    boolean isImageFitToScreen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,10 +151,9 @@ public class Informacion_sobre_obra extends VoiceActivity
 
             @Override
             public boolean onSwipeDown(int fingers, long gestureDuration, double gestureDistance) {
-
-                if(fingers == 3){
+                FloatingActionButton speak = findViewById(R.id.id_listener);
+                if (fingers == 3 && speak.isEnabled()) {
                     shutdown();
-                    FloatingActionButton speak = findViewById(R.id.id_listener);
                     speak.setEnabled(false);
                     speak.hide();
 
@@ -170,7 +165,7 @@ public class Informacion_sobre_obra extends VoiceActivity
             @Override
             public boolean onSwipeLeft(int fingers, long gestureDuration, double gestureDistance) {
                 if(fingers == 1){
-                    ms.getObraAnterior();
+                    ms.getObraSiguiente();
                     loadObraActual();
                 }
                 return false;
@@ -179,7 +174,7 @@ public class Informacion_sobre_obra extends VoiceActivity
             @Override
             public boolean onSwipeRight(int fingers, long gestureDuration, double gestureDistance) {
                 if(fingers == 1){
-                    ms.getObraSiguiente();
+                    ms.getObraAnterior();
                     loadObraActual();
                 }
                 return false;
@@ -205,7 +200,12 @@ public class Informacion_sobre_obra extends VoiceActivity
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mProximity = senSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+
         senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
+        senSensorManager.registerListener(this, mProximity , SensorManager.SENSOR_DELAY_NORMAL);
+
+
     }
 
     protected void onPause() {
@@ -238,6 +238,14 @@ public class Informacion_sobre_obra extends VoiceActivity
                 last_x = x;
                 last_y = y;
                 last_z = z;
+            }
+        }
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_PROXIMITY) {
+            AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+            if (sensorEvent.values[0] >= -SENSOR_SENSITIVITY && sensorEvent.values[0] <= SENSOR_SENSITIVITY) {
+                //near
+                cambiarEstadoBoton();
             }
         }
     }

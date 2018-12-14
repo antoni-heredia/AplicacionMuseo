@@ -37,7 +37,7 @@ class Museo implements Serializable {
 
     public Obra getObraSiguiente(){
         posObra++;
-        if(posObra > obras.size())
+        if (posObra >= obras.size())
             posObra  = 0;
         return obras.get(posObra);
     }

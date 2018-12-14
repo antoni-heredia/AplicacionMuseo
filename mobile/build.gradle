@@ -29,16 +29,15 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    wearApp project(':wear')
     implementation 'com.google.android.gms:play-services-wearable:+'
     implementation 'com.google.firebase:firebase-database:16.0.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.android.support:recyclerview-v7:28.0.0'
-    implementation 'in.championswimmer:SimpleFingerGestures_Android_Library:1.2'
     implementation 'ai.api:sdk:2.0.5@aar'
     implementation 'ai.api:libai:1.6.12'
     implementation 'com.google.android.gms:play-services-vision:17.0.2'
     implementation 'com.google.android.gms:play-services:7.8+'
     implementation 'com.github.blikoon:QRCodeScanner:0.1.2'
+    implementation 'in.championswimmer:SimpleFingerGestures_Android_Library:1.2'
 
 }

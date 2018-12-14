@@ -9,64 +9,43 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
-import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Parcelable;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.constraint.ConstraintLayout;
-import android.support.constraint.Constraints;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.WebView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blikoon.qrcodescanner.QrCodeActivity;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -77,8 +56,7 @@ import ai.api.model.AIRequest;
 import ai.api.model.AIResponse;
 import ai.api.model.Result;
 import in.championswimmer.sfg.lib.SimpleFingerGestures;
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.vision.barcode.Barcode;
+
 import com.squareup.picasso.Picasso;
 
 public class MainActivity extends VoiceActivity
@@ -93,6 +71,8 @@ public class MainActivity extends VoiceActivity
     private long lastUpdate = 0;
     private float last_x, last_y, last_z;
     private static final float SHAKE_THRESHOLD = 1000.0f;
+    private Sensor mProximity;
+    private static final int SENSOR_SENSITIVITY = 4;
 
     public static final String LOGTAG = "CHATBOT";
     public static final Integer ID_PROMPT_QUERY = 0;
@@ -183,7 +163,6 @@ public class MainActivity extends VoiceActivity
 
 
         SimpleFingerGestures mySfg = new SimpleFingerGestures();
-        mySfg.setDebug(true);
         mySfg.setConsumeTouchEvents(true);
         mySfg.setOnFingerGestureListener(new SimpleFingerGestures.OnFingerGestureListener() {
             @Override
@@ -244,8 +223,10 @@ public class MainActivity extends VoiceActivity
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
+        mProximity = senSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        senSensorManager.registerListener(this, mProximity , SensorManager.SENSOR_DELAY_NORMAL);
 
+        senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_NORMAL);
         CardView cardObra = findViewById(R.id.cardObra);
         CardView cardColeccion = findViewById(R.id.cardColecciones);
         CardView cardSalas = findViewById(R.id.cardSalas);
@@ -305,6 +286,13 @@ public class MainActivity extends VoiceActivity
                 last_x = x;
                 last_y = y;
                 last_z = z;
+            }
+        }
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_PROXIMITY) {
+            AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+            if (sensorEvent.values[0] >= -SENSOR_SENSITIVITY && sensorEvent.values[0] <= SENSOR_SENSITIVITY) {
+                cambiarEstadoBoton();
             }
         }
     }
@@ -428,16 +416,18 @@ public class MainActivity extends VoiceActivity
                 String s = new String(msg.getRecords()[0].getPayload());
                 //Elimino los 3 primeros caracteres que aparecen ya que no son validos,
                 // no entiendo muy bien el porque ocurre
-                manejoEtiquetaNfc(s.substring(3));
+                manejoEtiqueta(s.substring(3));
             }
         }
     }
 
 
-    protected void manejoEtiquetaNfc(String text){
+    protected void manejoEtiqueta(String text){
+        //manejamos la informacion recibida
         String[] registros = text.split(":");
         String tipo = registros[0];
         int id = Integer.parseInt(registros[1]);
+        //Segun el tipo de etiqueta que sea se lanzara una activity diferente
         if(tipo.toLowerCase().equals(TIPO_OBRA)){
             ms.getObraId(id);
             Intent intent = new Intent(getApplicationContext(), Informacion_sobre_obra.class);
@@ -831,7 +821,7 @@ public class MainActivity extends VoiceActivity
                 return;
             //Getting the passed result
             String result = data.getStringExtra("com.blikoon.qrcodescanner.got_qr_scan_relult");
-            manejoEtiquetaNfc(result);
+            manejoEtiqueta(result);
 
         }
     }
